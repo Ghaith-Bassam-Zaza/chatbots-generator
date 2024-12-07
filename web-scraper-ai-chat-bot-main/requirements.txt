@@ -1,0 +1,10 @@
+faiss-cpu
+langchain
+openai
+sqlalchemy
+psycopg2
+numpy
+sqlalchemy_utils
+sentence_transformers
+bs4
+langchain-community
