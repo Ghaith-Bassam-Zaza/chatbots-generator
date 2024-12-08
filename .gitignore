@@ -1,3 +1,14 @@
+# Ignore virtual environments
 venv/
+
+# Ignore specific configuration files
 CONSTANTS.py
+
+# Ignore Python cache directories
+__pycache__/
+
+# Ignore specific files in the generator-API directory
+generator-API/CONSTANTS.py
+generator-API/.gitignore
+
 
