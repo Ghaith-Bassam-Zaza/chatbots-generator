@@ -8,3 +8,4 @@ sqlalchemy_utils
 sentence_transformers
 bs4
 langchain-community
+tiktoken
