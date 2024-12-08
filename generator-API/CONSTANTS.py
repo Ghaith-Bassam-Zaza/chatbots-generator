@@ -1,2 +1,0 @@
-DATABASE_URL = "postgresql://postgres:g2001zaza@localhost:5432/chatbotsgeneratordb"
-API_KEY ='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'
