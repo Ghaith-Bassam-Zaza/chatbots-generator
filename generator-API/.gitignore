@@ -2,4 +2,4 @@ data/
 venv/
 chroma_db/
 __pycache__/
-CONSTANS.py
+CONSTANTS.py

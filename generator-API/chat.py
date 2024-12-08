@@ -8,7 +8,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.llms import OpenAI
 
 # Fetch texts and embeddings from the database
-def fetch_texts_and_embeddings():
+def fetch_texts_and_embeddings(bot_id):
     """
     Fetch texts and embeddings from the database.
 
@@ -18,8 +18,8 @@ def fetch_texts_and_embeddings():
     """
     try:
         # Query ScrapedContent and Embedding tables
-        contents = session.query(ScrapedContent).all()
-        embeddings_data = session.query(Embedding).all()
+        contents = session.query(ScrapedContent).filter_by(bot_id=bot_id).all()
+        embeddings_data = session.query(Embedding).filter_by(bot_id=bot_id).all()
 
         if not contents or not embeddings_data:
             print("No texts or embeddings found in the database.")
@@ -44,14 +44,14 @@ def fetch_texts_and_embeddings():
         return [], []
 
 # Initialize FAISS vector store
-def initialize_faiss_vector_store():
+def initialize_faiss_vector_store(bot_id):
     """
     Initialize the FAISS vector store using texts and embeddings from the database.
 
     Returns:
         faiss_store: The FAISS vector store instance.
     """
-    texts, _ = fetch_texts_and_embeddings()  # Fetch texts only
+    texts, _ = fetch_texts_and_embeddings(bot_id)  # Fetch texts only
     if not texts:
         raise ValueError("No texts found in the database.")
 
@@ -68,43 +68,39 @@ def initialize_faiss_vector_store():
         print(f"Error initializing FAISS vector store: {e}")
         raise
 
-# Chatbot functionality
-def chat():
+def chat(bot_id):
     """
-    Main chat function for handling user interactions with the chatbot.
+    Main chat function for handling user interactions with the chatbot using bot_id.
     """
     try:
-        print("Starting chatbot service...")
+        print(f"Starting chatbot service for bot_id {bot_id}...")
 
-        # Initialize FAISS vector store
-        vector_store = initialize_faiss_vector_store()
+        # Initialize FAISS vector store specific to the bot_id
+        vector_store = initialize_faiss_vector_store(bot_id)
 
         # Load the conversation chain with memory
-        memory = ConversationBufferMemory(memory_key="history")  # Ensure key matches expected format
+        memory = ConversationBufferMemory(memory_key="history")
         llm = OpenAI(temperature=0.7, model_name="gpt-3.5-turbo-16k", openai_api_key=API_KEY)
         conversation = ConversationChain(llm=llm, memory=memory)
 
-        print("Chatbot is ready. Start chatting!")
+        print(f"Chatbot {bot_id} is ready. Start chatting!")
 
-        # Run chatbot loop
         while True:
             user_input = input("You: ")
             if user_input.lower() in ["exit", "quit"]:
                 print("Exiting chatbot. Goodbye!")
                 break
 
-            # Query FAISS for most similar document
             similar_docs = vector_store.similarity_search(user_input, k=3)
             if similar_docs:
                 for i, doc in enumerate(similar_docs):
                     print(f"Relevant Doc {i + 1}: {doc}")
 
-            # Get response from conversation chain
             response = conversation.predict(input=user_input)
             print(f"Bot: {response}")
 
     except Exception as e:
-        print(f"Error in chatbot service: {e}")
+        print(f"Error in chatbot service for bot_id {bot_id}: {e}")
 
 # Example usage for testing
 if __name__ == "__main__":

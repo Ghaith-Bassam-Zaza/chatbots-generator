@@ -4,27 +4,24 @@ from chat import chat  # Assuming this starts the chatbot server
 from db_setup import initialize_database
 
 def main():
-    # Initialize database (only creates tables if they do not exist)
+    # Initialize database
     initialize_database()
 
-    # Define the starting URL and depth
-    start_url = "https://sensia-consulting.com/"
-    start_depth = 3  # For now, depth is unused unless recursion is implemented in scraping.
+    # Define bot_id for this instance
+    bot_id = 1  # Change this for different bots as needed
 
-    # Step 1: Scrape the website
-    print("Scraping website...")
-    scrape_website(start_url,start_depth)
-    print("Scraping completed.")
+    # Scrape, generate embeddings, and start the chatbot for a specific bot_id
+    # print(f"Scraping website for bot_id {bot_id}...")
+    # scrape_website("https://sensia-consulting.com/", bot_id)
+    # print("Scraping completed.")
 
-    # Step 2: Generate embeddings
-    print("Generating embeddings...")
-    generate_embeddings()
-    print("Embedding generation completed.")
+    # print(f"Generating embeddings for bot_id {bot_id}...")
+    # generate_embeddings(bot_id)
+    # print("Embedding generation completed.")
 
-    # Step 3: Start chatbot service
-    print("Starting chatbot service...")
-    chat()
-    print("Chatbot service is running.")
+    print(f"Starting chatbot service for bot_id {bot_id}...")
+    chat(bot_id)
+    print(f"Chatbot {bot_id} service is running.")
 
 if __name__ == "__main__":
     main()

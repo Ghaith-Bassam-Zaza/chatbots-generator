@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block content %}
+  <h1>Manage Your Chatbots</h1>
+  <div class="container">
+      <!-- Left side: Create chatbot form -->
+      <div class="form-container">
+          <h2>Create a New Chatbot</h2>
+          <form method="POST" action="{{ url_for('chatbots') }}">
+              <label for="bot_name">Bot Name:</label>
+              <input type="text" id="bot_name" name="bot_name" required>
+              
+              <label for="bot_url">Website URL:</label>
+              <input type="url" id="bot_url" name="bot_url" required>
+              
+              <button type="submit">Generate Script</button>
+          </form>
+      </div>
+
+      <!-- Right side: List of chatbots -->
+      <div class="chatbots-list">
+          <h2>Your Chatbots</h2>
+          {% if chatbots %}
+              <ul>
+                  {% for bot in chatbots %}
+                      <li>
+                          <strong>{{ bot.name }}</strong><br>
+                          URL: <a href="{{ bot.url }}" target="_blank">{{ bot.url }}</a><br>
+                          <textarea readonly>{{ bot.script }}</textarea>
+                      </li>
+                  {% endfor %}
+              </ul>
+          {% else %}
+              <p>No chatbots created yet.</p>
+          {% endif %}
+      </div>
+  </div>
+{% endblock %}

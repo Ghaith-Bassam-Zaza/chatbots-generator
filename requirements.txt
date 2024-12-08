@@ -9,3 +9,6 @@ sentence_transformers
 bs4
 langchain-community
 tiktoken
+flask
+flask_sqlalchemy
+flask_login
