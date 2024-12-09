@@ -1,42 +1,44 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Home
+    Manage Bots
 {% endblock %}
 
 {% block content %}
-  <h1>Manage Your Chatbots</h1>
-  <div class="container">
-      <!-- Left side: Create chatbot form -->
-      <div class="form-container">
-          <h2>Create a New Chatbot</h2>
-          <form method="POST" action="{{ url_for('chatbots') }}">
-              <label for="bot_name">Bot Name:</label>
-              <input type="text" id="bot_name" name="bot_name" required>
-              
-              <label for="bot_url">Website URL:</label>
-              <input type="url" id="bot_url" name="bot_url" required>
-              
-              <button type="submit">Generate Script</button>
-          </form>
-      </div>
+    <h1>Welcome to Your Bot Dashboard</h1>
 
-      <!-- Right side: List of chatbots -->
-      <div class="chatbots-list">
-          <h2>Your Chatbots</h2>
-          {% if chatbots %}
-              <ul>
-                  {% for bot in chatbots %}
-                      <li>
-                          <strong>{{ bot.name }}</strong><br>
-                          URL: <a href="{{ bot.url }}" target="_blank">{{ bot.url }}</a><br>
-                          <textarea readonly>{{ bot.script }}</textarea>
-                      </li>
-                  {% endfor %}
-              </ul>
-          {% else %}
-              <p>No chatbots created yet.</p>
-          {% endif %}
-      </div>
-  </div>
+    <!-- Display existing bots -->
+    <h2>Your Bots</h2>
+    {% if bots %}
+        <ul>
+            {% for bot in bots %}
+                <li>
+                    <strong>{{ bot.name }}</strong>: {{ bot.description }}
+                    <br>
+                    <code>
+                        <!-- Show the generated script -->
+                        &lt;script src="your-script-url.js" bot_id="{{ bot.id }}"&gt;&lt;/script&gt;
+                    </code>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You don't have any bots yet.</p>
+    {% endif %}
+
+    <!-- Form to create a new bot -->
+    <h2>Create a New Bot</h2>
+    {% if success %}
+        <p style="color: green;">Bot created successfully! Copy the script below:</p>
+        <textarea rows="10" cols="800">{{ script }}</textarea>
+    {% endif %}
+    <form method="POST" action="/">
+        <label for="bot_name">Bot Name:</label>
+        <input class="form-control" type="text" id="bot_name" name="bot_name" required>
+        <br>
+        <label for="bot_url">Bot URL:</label>
+        <textarea class="form-control" id="bot_url" name="bot_url"></textarea>
+        <br>
+        <button class="form-control" type="submit">Create Bot</button>
+    </form>
 {% endblock %}

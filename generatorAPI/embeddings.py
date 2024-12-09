@@ -1,5 +1,5 @@
 import openai
-from db_setup import ScrapedContent, Embedding, session
+from .db_setup import ScrapedContent, Embedding, session
 import numpy as np
 from CONSTANTS import API_KEY
 # OpenAI API setup

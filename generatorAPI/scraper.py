@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from db_setup import ScrapedContent, session
+from .db_setup import ScrapedContent, session
 from urllib.parse import urljoin, urlparse
 
 # Define a set to keep track of visited URLs to avoid duplicate scraping

@@ -6,15 +6,15 @@ from CONSTANTS import WEB_DATABASE_URL, SECRET_KEY
 import os
 
 db = SQLAlchemy()
-migrate = Migrate()  # Initialize Flask-Migrate
 
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = SECRET_KEY
     app.config['SQLALCHEMY_DATABASE_URI'] = WEB_DATABASE_URL
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Avoid deprecation warnings
-    db.init_app(app)
-    migrate.init_app(app, db)  # Link Flask-Migrate with your app and db
+    db.init_app(app) 
+    with app.app_context():
+        db.create_all()
 
     from .views import views
     from .auth import auth
