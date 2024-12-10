@@ -5,6 +5,8 @@ from datetime import datetime
 from . import db
 from flask_login import UserMixin
 
+
+
 # User model with auto-incrementing integer ID
 class User(db.Model, UserMixin):
     __tablename__ = 'users'

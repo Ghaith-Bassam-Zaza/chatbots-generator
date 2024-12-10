@@ -16,7 +16,7 @@ Base = declarative_base()
 class ScrapedContent(Base):
     __tablename__ = 'scraped_content'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    url = Column(String, unique=True, nullable=False)
+    url = Column(String, nullable=False)
     content = Column(Text, nullable=False)
     bot_id = Column(Integer, nullable=False)  # Added bot_id for identification
 
