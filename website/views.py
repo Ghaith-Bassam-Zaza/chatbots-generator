@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for
+from flask import Blueprint, flash,render_template, request, jsonify, redirect, url_for
 from uuid import uuid4
 from .models import db, Bot, Session, Message  
 from flask_login import login_required, current_user
@@ -11,9 +11,9 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain.llms import OpenAI
-
+from flask_cors import CORS
 views = Blueprint('views', __name__)
-
+CORS(views)
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
@@ -26,7 +26,6 @@ def home():
         new_bot = Bot(name=bot_name, url=bot_url, user_id=current_user.id)
         db.session.add(new_bot)
         db.session.commit()
-
         # Initialize the bot: scrape, generate embeddings, and prepare for chat
         try:
             print("Initializing database...")
@@ -38,10 +37,11 @@ def home():
             print(f"Generating embeddings for bot: {bot_name}")
             generate_embeddings(new_bot.id)
         except Exception as e:
+            flash("Sorry! chatbot generation failed!", category="error")
             db.session.delete(new_bot)
             db.session.commit()
             return jsonify({"error": f"Failed to initialize bot: {e}"}), 500
-
+        
         # Generate the embed script for the user
         embed_script = f"""
             <div id="chat-container-{new_bot.id}" style="border: 1px solid #ccc; padding: 10px; width: 300px;">
@@ -85,7 +85,7 @@ def home():
                     .then(response => response.json())
                     .then(data => {{
                         const botMessageDiv = document.createElement('div');
-                        botMessageDiv.textContent = "Bot: " + data.response;
+                        botMessageDiv.textContent = "{bot_name}: " + data.response;
                         chatHistory.appendChild(botMessageDiv);
                         chatHistory.scrollTop = chatHistory.scrollHeight;
                     }})
@@ -95,8 +95,8 @@ def home():
                 }});
             </script>
             """
-
-        return render_template('home.html', embed_script=embed_script, bots=get_user_bots(), user=current_user)
+        flash("Chatbot generated successfully!", category="success")
+        return render_template('home.html', success = True,script=embed_script, bots=get_user_bots(), user=current_user)
 
     # For GET request, show the home page with existing bots
     return render_template('home.html', embed_script='', bots=get_user_bots(), user=current_user)
@@ -148,6 +148,7 @@ def chat():
     """
     RESTful API for chatbot interaction.
     """
+    print('received')
     try:
         # Parse input JSON
         data = request.get_json()
@@ -183,12 +184,12 @@ def chat():
 
         # Generate chatbot response
         response = conversation.predict(input=user_message)
-
+        print(response)
         return jsonify({
             "session_id": session_id,
             "bot_id": bot_id,
             "response": response,
-            "relevant_docs": relevant_docs
+            
         })
 
     except Exception as e:

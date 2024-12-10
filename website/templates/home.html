@@ -5,41 +5,115 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Welcome to Your Bot Dashboard</h1>
+<h1>Welcome to Your Bot Dashboard</h1>
 
-    <!-- Display existing bots -->
-    <h2>Your Bots</h2>
-    {% if bots %}
-        <ul>
-            {% for bot in bots %}
-                <li>
-                    <strong>{{ bot.name }}</strong>: {{ bot.description }}
-                    <br>
-                    <code>
-                        <!-- Show the generated script -->
-                        &lt;script src="your-script-url.js" bot_id="{{ bot.id }}"&gt;&lt;/script&gt;
-                    </code>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>You don't have any bots yet.</p>
-    {% endif %}
+<h2>Your Bots</h2>
+{% if bots %}
+    <ul>
+        {% for bot in bots %}
+            <li>
+                <strong>{{ bot.name }}</strong>: {{ bot.description }}
+                <br>
+                <button class="copy-btn" onclick="copyToClipboard('{{ bot.id }}', '{{ bot.name }}')">Copy Script</button>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>You don't have any bots yet.</p>
+{% endif %}
 
-    <!-- Form to create a new bot -->
-    <h2>Create a New Bot</h2>
-    {% if success %}
-        <p style="color: green;">Bot created successfully! Copy the script below:</p>
-        <textarea rows="10" cols="800">{{ script }}</textarea>
-    {% endif %}
-    <form method="POST" action="/">
-        <label for="bot_name">Bot Name:</label>
-        <input class="form-control" type="text" id="bot_name" name="bot_name" required>
-        <br>
-        <label for="bot_url">Bot URL:</label>
-        <textarea class="form-control" id="bot_url" name="bot_url"></textarea>
-        <br>
-        <button class="form-control" type="submit">Create Bot</button>
-    </form>
-    <p>{{ embed_script }}</p>
+<h2>Create a New Bot</h2>
+{% if success %}
+    <p style="color: green;">Bot created successfully! Copy the script below:</p>
+    <textarea rows="10" cols="80">{{ script }}</textarea>
+{% endif %}
+<form method="POST" action="/">
+    <label for="bot_name">Bot Name:</label>
+    <input class="form-control" type="text" id="bot_name" name="bot_name" required>
+    <br>
+    <label for="bot_url">Bot URL:</label>
+    <textarea class="form-control" id="bot_url" name="bot_url"></textarea>
+    <br>
+    <button class="form-control" type="submit">Create Bot</button>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    .copy-btn {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 12px;
+    }
+    .copy-btn:hover {
+        background-color: #45a049;
+    }
+</style>
+
+<script>
+    function copyToClipboard(botId, botName) {
+        const embedScript = `
+<div id="chat-container-${botId}" style="border: 1px solid #ccc; padding: 10px; width: 300px;">
+    <div id="chat-history-${botId}" style="height: 200px; overflow-y: scroll; border-bottom: 1px solid #ccc; margin-bottom: 10px;">
+        <!-- Chat messages will appear here -->
+    </div>
+    <textarea id="chat-input-${botId}" placeholder="Type your message here..." style="width: 100%; height: 50px;"></textarea>
+    <button id="send-button-${botId}" style="width: 100%; margin-top: 5px;">Send</button>
+</div>
+<script>
+    const botId = '${botId}';
+    const apiUrl = 'http://127.0.0.1:5000/api/chat';
+    const chatContainer = document.getElementById('chat-container-' + botId);
+    const chatHistory = document.getElementById('chat-history-' + botId);
+    const chatInput = document.getElementById('chat-input-' + botId);
+    const sendButton = document.getElementById('send-button-' + botId);
+
+    let sessionId = localStorage.getItem('chat_session_' + botId);
+    if (!sessionId) {
+        sessionId = crypto.randomUUID();
+        localStorage.setItem('chat_session_' + botId, sessionId);
+    }
+
+    sendButton.addEventListener('click', () => {
+        const userMessage = chatInput.value.trim();
+        if (!userMessage) return;
+
+        const userMessageDiv = document.createElement('div');
+        userMessageDiv.textContent = "You: " + userMessage;
+        chatHistory.appendChild(userMessageDiv);
+
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_id: sessionId, bot_id: botId, message: userMessage }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            const botMessageDiv = document.createElement('div');
+            botMessageDiv.textContent = "${botName}: " + data.response;
+            chatHistory.appendChild(botMessageDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        })
+        .catch(error => console.error('Error:', error));
+
+        chatInput.value = '';
+    });
+<\/script> 
+`;
+
+        navigator.clipboard.writeText(embedScript).then(() => {
+            alert('Script copied to clipboard!');
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    }
+</script>
 {% endblock %}
